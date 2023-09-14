@@ -1,25 +1,40 @@
-import './App.css';
-import Cards from './components/cards/Cards.jsx';
-import Nav from './components/nav/Nav';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import axios from "axios";
+import About from './components/about/About';
+import Cards from './components/cards/Cards.jsx';
+import Detail from './components/detail/Detail';
+import Favorites from './components/favorites/Favorites';
+import Form from './components/form/Form';
+import Nav from './components/nav/Nav';
+import './App.css';
 
 function App() {
-   const example = {
-      id: 1,
-      name: 'Rick Sanchez',
-      status: 'Alive',
-      species: 'Human',
-      gender: 'Male',
-      origin: {
-         name: 'Earth (C-137)',
-         url: 'https://rickandmortyapi.com/api/location/1',
-      },
-      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
-   };
 
    const [ characters, setCharacters ] = useState([]); // [ estado, functión ]
    
+   const navigate = useNavigate(); // path actual y redirige!!!
+   // console.log(navigate);
+   const [access, setAccess] = useState(false);
+   const EMAIL = 'ejemplo@gmail.com';
+   const PASSWORD = '123456';
+
+   function login(userData) {
+      if (userData.password === PASSWORD && userData.email === EMAIL) {
+         setAccess(true);
+         navigate('/home');
+      } else {
+         alert("Por favor ingrese sus credenciales...")
+      }
+   }
+
+   useEffect(() => {
+      !access && navigate('/home'); //! Ingresar a /home
+   }, [access]);
+
+   const location = useLocation();
+   console.log(location.pathname);
+
    function onSearch(id) {
       axios(`https://rickandmortyapi.com/api/character/${id}`).then(({ data }) => {
          if (data.name) {
@@ -28,6 +43,13 @@ function App() {
             
             window.alert('¡No hay personajes con este ID!');
          }
+      axios(`https://rickandmortyapi.com/api/character/${id}`)
+         .then(({ data }) => {
+            if (data.name) {
+               setCharacters((oldChars) => [...oldChars, data]);
+            } else {
+               window.alert('¡No hay personajes con este ID!');
+            }
       });
    }
 
@@ -39,8 +61,38 @@ function App() {
 
    return (
       <div className='App'>
-         <Nav onSearch={onSearch} />
-         <Cards characters={characters} onClose={onClose} />
+         {
+            location.pathname !== "/" && <Nav onSearch={onSearch} />
+            // "/"   false => X
+            //  "/algoMas..." true => Evaluar la segunda parte
+         }
+         <Routes >
+            <Route
+               path="/"
+               element={<Form login={login} />}
+            />
+            <Route
+               path="/home"
+               element={<Cards characters={characters} onClose={onClose} />}
+            />
+            <Route
+               path="/about"
+               element={<About />}
+            />
+            <Route
+               path="/detail/:id"
+               element={<Detail />}
+            />
+            <Route
+               path="/favorites"
+               element={<Favorites onClose={onClose} />}
+            />
+            <Route
+               path="*"
+               element={<About />}
+            />
+         </Routes>
+         
       </div>
    );
 }
