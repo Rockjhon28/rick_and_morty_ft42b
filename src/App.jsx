@@ -50,12 +50,13 @@ function App() {
             } else {
                window.alert('¡No hay personajes con este ID!');
             }
+
       });
    }
-
+      )
    const onClose = (id) => {
       setCharacters(characters.filter(char => char.id !== Number(id)))
-   }
+    };
    // characters = [ {id:1}, {id:3} ]
    // id = 2
 
@@ -96,5 +97,5 @@ function App() {
       </div>
    );
 }
-
+}
 export default App;
